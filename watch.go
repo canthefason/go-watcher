@@ -50,9 +50,7 @@ func (w *Watcher) ListenChanges() {
 	for {
 		select {
 		case event := <-w.watcher.Events:
-			if event.Op&fsnotify.Write == fsnotify.Write ||
-				event.Op&fsnotify.Create == fsnotify.Create {
-
+			if event.Op&fsnotify.Chmod != fsnotify.Chmod {
 				ext := filepath.Ext(event.Name)
 				if ext == ".go" || ext == ".tmpl" {
 					w.update <- struct{}{}
