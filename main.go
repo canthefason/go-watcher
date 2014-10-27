@@ -1,28 +1,16 @@
 package main
 
-import (
-	"log"
-	"os"
-)
+import "os"
 
 const binaryName = "goldorf-main"
-
-var (
-	done chan struct{}
-)
-
-func initChannels() {
-	done = make(chan struct{})
-}
 
 func main() {
 	w := MustRegisterWatcher()
 	defer w.Close()
-	defer close(done)
+
+	done := make(chan struct{})
 
 	r := NewRunner()
-
-	initChannels()
 
 	// first build given package
 	go build(w, r)
@@ -34,8 +22,6 @@ func main() {
 	go w.ListenChanges()
 
 	<-done
-
-	log.Print("exiting")
 }
 
 func getArgs() []string {
