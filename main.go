@@ -34,6 +34,7 @@ func prepareArgs() ([]string, string) {
 
 	filteredArgs := make([]string, 0)
 	var rootpackage string
+	// !!! TODO change this part, it is error prone for parameters w/o values.
 	for i := 0; i < len(args); i += 2 {
 		if args[i] == "-rootpackage" || args[i] == "--rootpackage" {
 			rootpackage = args[i+1]
