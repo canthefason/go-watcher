@@ -1,6 +1,8 @@
 package main
 
 import (
+	"errors"
+	"fmt"
 	"log"
 	"os"
 	"path/filepath"
@@ -10,13 +12,18 @@ import (
 )
 
 type Watcher struct {
+	rootdir string
 	watcher *fsnotify.Watcher
 	update  chan struct{}
 }
 
-func MustRegisterWatcher() *Watcher {
+var ErrPathNotSet = errors.New("gopath not set")
+
+func MustRegisterWatcher(rootdir string) *Watcher {
+
 	w := &Watcher{
-		update: make(chan struct{}),
+		update:  make(chan struct{}),
+		rootdir: rootdir,
 	}
 
 	var err error
@@ -69,9 +76,10 @@ func (w *Watcher) Wait() {
 // watchFolders recursively adds folders that will be watched for changes,
 // starting from the working directory
 func (w *Watcher) watchFolders() {
-	wd, err := os.Getwd()
+	wd, err := w.prepareRootDir()
+
 	if err != nil {
-		log.Fatalf("Could not get current working directory: %s", err)
+		log.Fatalf("Could not get root working directory: %s", err)
 	}
 
 	filepath.Walk(wd, func(path string, info os.FileInfo, err error) error {
@@ -97,4 +105,19 @@ func (w *Watcher) addFolder(name string) {
 	if err := w.watcher.Add(name); err != nil {
 		log.Fatalf("Could not watch folder: %s", err)
 	}
+}
+
+func (w *Watcher) prepareRootDir() (string, error) {
+	if w.rootdir == "" {
+		return os.Getwd()
+	}
+
+	path := os.Getenv("GOPATH")
+	if path == "" {
+		return "", ErrPathNotSet
+	}
+
+	root := fmt.Sprintf("%s/src/%s", path, w.rootdir)
+
+	return root, nil
 }
