@@ -2,7 +2,9 @@ package main
 
 import (
 	"log"
+	"os"
 	"path/filepath"
+	"strings"
 
 	"gopkg.in/fsnotify.v1"
 )
@@ -25,10 +27,7 @@ func MustRegisterWatcher() *Watcher {
 
 	// TODO configurable input path
 	// add watched paths
-	err = w.watcher.Add("./")
-	if err != nil {
-		log.Fatalf("Could not register watcher: %s", err)
-	}
+	w.watchFolders()
 
 	// send update signal for initial package build
 	go func() {
@@ -65,4 +64,37 @@ func (w *Watcher) Close() {
 
 func (w *Watcher) Wait() {
 	<-w.update
+}
+
+// watchFolders recursively adds folders that will be watched for changes,
+// starting from the working directory
+func (w *Watcher) watchFolders() {
+	wd, err := os.Getwd()
+	if err != nil {
+		log.Fatalf("Could not get current working directory: %s", err)
+	}
+
+	filepath.Walk(wd, func(path string, info os.FileInfo, err error) error {
+		// skip files
+		if !info.IsDir() {
+			return nil
+		}
+
+		// skip hidden folders
+		if len(path) > 1 && strings.HasPrefix(filepath.Base(path), ".") {
+			return filepath.SkipDir
+		}
+
+		w.addFolder(path)
+
+		return err
+	})
+}
+
+// addFolder adds given folder name to the watched folders, and starts
+// watching it for further changes
+func (w *Watcher) addFolder(name string) {
+	if err := w.watcher.Add(name); err != nil {
+		log.Fatalf("Could not watch folder: %s", err)
+	}
 }
