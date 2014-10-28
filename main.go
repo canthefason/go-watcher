@@ -19,6 +19,8 @@ func main() {
 
 	// run the binary with given arguments
 	go r.Init(args...)
+	// force update for initial package build
+	go w.ForceUpdate()
 
 	// listen for further changes
 	go w.ListenChanges()

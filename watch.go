@@ -36,11 +36,6 @@ func MustRegisterWatcher(rootdir string) *Watcher {
 	// add watched paths
 	w.watchFolders()
 
-	// send update signal for initial package build
-	go func() {
-		w.update <- struct{}{}
-	}()
-
 	return w
 }
 
@@ -69,6 +64,11 @@ func (w *Watcher) Close() {
 
 func (w *Watcher) Wait() {
 	<-w.update
+}
+
+// send update signal for initial package build
+func (w *Watcher) ForceUpdate() {
+	w.update <- struct{}{}
 }
 
 // watchFolders recursively adds folders that will be watched for changes,
