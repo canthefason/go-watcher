@@ -32,7 +32,6 @@ func MustRegisterWatcher(params *Params) *Watcher {
 		log.Fatalf("Could not register watcher: %s", err)
 	}
 
-	// TODO configurable input path
 	// add watched paths
 	w.watchFolders()
 
@@ -82,6 +81,10 @@ func (w *Watcher) watchFolders() {
 
 	filepath.Walk(wd, func(path string, info os.FileInfo, err error) error {
 		// skip files
+		if info == nil {
+			log.Fatalf("wrong watcher package: %s", path)
+		}
+
 		if !info.IsDir() {
 			return nil
 		}
