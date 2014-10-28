@@ -6,7 +6,7 @@ import (
 	"syscall"
 )
 
-func build(w *Watcher, r *Runner) {
+func build(w *Watcher, r *Runner, p *Params) {
 	for {
 		w.Wait()
 

@@ -13,7 +13,7 @@ func main() {
 	r := NewRunner()
 
 	// first build given package
-	go build(w, r)
+	go build(w, r, params)
 
 	// run the binary with given arguments
 	go r.Init(args...)
