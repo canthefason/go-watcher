@@ -19,11 +19,11 @@ type Watcher struct {
 
 var ErrPathNotSet = errors.New("gopath not set")
 
-func MustRegisterWatcher(rootdir string) *Watcher {
+func MustRegisterWatcher(params *Params) *Watcher {
 
 	w := &Watcher{
 		update:  make(chan struct{}),
-		rootdir: rootdir,
+		rootdir: params.Get("watch"),
 	}
 
 	var err error

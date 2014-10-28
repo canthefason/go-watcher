@@ -5,7 +5,7 @@ const binaryName = "goldorf-main"
 func main() {
 	params := prepareArgs()
 
-	w := MustRegisterWatcher(rootpackage)
+	w := MustRegisterWatcher(params)
 	defer w.Close()
 
 	done := make(chan struct{})
