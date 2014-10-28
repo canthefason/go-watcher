@@ -1,6 +1,10 @@
 package main
 
-import "log"
+import (
+	"log"
+	"os/exec"
+	"syscall"
+)
 
 func build(w *Watcher, r *Runner) {
 	for {
@@ -16,7 +20,12 @@ func build(w *Watcher, r *Runner) {
 		}
 
 		if err := cmd.Wait(); err != nil {
-			log.Println("Waiting for file change...")
+			if err := interpretError(err); err != nil {
+				log.Fatal("An error occurred while building")
+			}
+
+			log.Println("A build error occurred. Please update your code...")
+
 			continue
 		}
 
@@ -26,4 +35,25 @@ func build(w *Watcher, r *Runner) {
 		// and start the new process
 		r.Run()
 	}
+}
+
+// interpretError checks the error, and returns nil if it is
+// an exit code 2 error. Otherwise error is returned as it is
+// when a compilation error occurres, it returns with code 2.
+func interpretError(err error) error {
+	exiterr, ok := err.(*exec.ExitError)
+	if !ok {
+		return err
+	}
+
+	status, ok := exiterr.Sys().(syscall.WaitStatus)
+	if !ok {
+		return err
+	}
+
+	if status.ExitStatus() == 2 {
+		return nil
+	}
+
+	return err
 }
