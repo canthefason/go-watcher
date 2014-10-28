@@ -12,8 +12,12 @@ func build(w *Watcher, r *Runner, p *Params) {
 
 		log.Println("Building...")
 
-		// TODO build path must be optional
-		cmd, err := runCommand("go", "build", "-o", binaryName)
+		run := p.Get("run")
+		if run == "" {
+			run = "."
+		}
+
+		cmd, err := runCommand("go", "build", "-o", binaryName, run)
 		if err != nil {
 			log.Fatalf("Could not run 'go build' command: %s", err)
 			continue
