@@ -19,14 +19,14 @@ func NewRunner() *Runner {
 	}
 }
 
-func (r *Runner) Init(args ...string) {
+func (r *Runner) Init(p *Params) {
 
 	for {
 		<-r.start
 
 		log.Println("Running...")
 
-		cmd, err := runCommand(prepareBinaryName(binaryName), args...)
+		cmd, err := runCommand(prepareBinaryName(binaryName), p.Package...)
 		if err != nil {
 			log.Println("Could not run the go binary: %s", err)
 			continue

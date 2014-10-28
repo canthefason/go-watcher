@@ -12,11 +12,12 @@ func main() {
 
 	r := NewRunner()
 
+	// wait for build and run the binary with given params
+	go r.Init(params)
+
 	// first build given package
 	go build(w, r, params)
 
-	// run the binary with given arguments
-	go r.Init(args...)
 	// force update for initial package build
 	go w.ForceUpdate()
 
