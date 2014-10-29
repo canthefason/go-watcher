@@ -44,7 +44,9 @@ Micro management of the watched packages are not supported.
 
 ## Name inspiration
 
-Package gets its name from one of the old spectators of The Muppet Show: Waldorf.
+Package gets its name from one of the old spectators of The Muppet Show: Waldorf. They will be watching all your changes. 
+
+![Image of Waldorf](http://upload.wikimedia.org/wikipedia/en/f/fa/StatlerandWaldorf(2).JPG)
 
 ## Author
 
