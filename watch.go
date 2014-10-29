@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"gopkg.in/fsnotify.v1"
 )
@@ -41,13 +42,23 @@ func MustRegisterWatcher(params *Params) *Watcher {
 // ListenChanges listens file updates, and sends signal to
 // update channel when go files are updated
 func (w *Watcher) ListenChanges() {
+	eventSent := false
 	for {
 		select {
 		case event := <-w.watcher.Events:
 			if event.Op&fsnotify.Chmod != fsnotify.Chmod {
 				ext := filepath.Ext(event.Name)
 				if ext == ".go" || ext == ".tmpl" {
-					w.update <- struct{}{}
+					if !eventSent {
+
+						// prevent consecuent build
+						eventSent = true
+						go func() {
+							time.Sleep(200 * time.Millisecond)
+							eventSent = false
+						}()
+						w.update <- struct{}{}
+					}
 				}
 
 			}
