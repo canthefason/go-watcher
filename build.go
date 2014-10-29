@@ -10,12 +10,12 @@ func build(w *Watcher, r *Runner, p *Params) {
 	for {
 		w.Wait()
 
-		log.Println("Building...")
-
 		run := p.Get("run")
 		if run == "" {
 			run = "."
 		}
+
+		log.Printf("Building %s...\n", run)
 
 		cmd, err := runCommand("go", "build", "-o", binaryName, run)
 		if err != nil {

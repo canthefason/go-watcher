@@ -24,7 +24,7 @@ func (r *Runner) Init(p *Params) {
 	for {
 		<-r.start
 
-		log.Println("Running...")
+		log.Printf("Running %s...\n", p.Get("run"))
 
 		cmd, err := runCommand(prepareBinaryName(binaryName), p.Package...)
 		if err != nil {
