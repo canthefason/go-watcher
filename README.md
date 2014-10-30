@@ -35,7 +35,7 @@ Goldorf works like your native binary package. You can pass all the arguments th
 
 When you run the command it starts watching folders recursively, starting from the current working directory. It only watches .go and .tmpl files and ignores hidden folders.
 
-##### Rootpackage (God mode on)
+##### Package dependency
   `goldorf -c config -run github.com/username/somerootpackagename`
   
 When your GOPATH is set, you can run your apps via their package names with -run parameter. By default it watches the underlying folder with subfolders. 
