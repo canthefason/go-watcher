@@ -1,4 +1,4 @@
-package main
+package watcher
 
 import (
 	"io"
@@ -6,6 +6,9 @@ import (
 	"os"
 	"os/exec"
 )
+
+// Binary name used for built package
+const binaryName = "goldorf-main"
 
 type Params struct {
 	// Package parameters
@@ -59,9 +62,9 @@ func runCommand(name string, args ...string) (*exec.Cmd, error) {
 	return cmd, nil
 }
 
-// prepareArgs filters the system parameters from package parameters
+// PrepareArgs filters the system parameters from package parameters
 // and returns Params instance
-func prepareArgs() *Params {
+func PrepareArgs() *Params {
 
 	params := NewParams()
 

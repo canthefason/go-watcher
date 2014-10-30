@@ -1,4 +1,6 @@
-package main
+// Watcher package watch all file changes via fsnotify package and sends
+// update events to builder
+package watcher
 
 import (
 	"errors"
@@ -20,6 +22,7 @@ type Watcher struct {
 	update  chan struct{}
 }
 
+// GoPath not set error
 var ErrPathNotSet = errors.New("gopath not set")
 
 // MustRegisterWatcher creates a new Watcher and starts listening
