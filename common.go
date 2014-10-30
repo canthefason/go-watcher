@@ -8,10 +8,13 @@ import (
 )
 
 type Params struct {
+	// Package parameters
 	Package []string
-	System  map[string]string
+	// Goldorf parameters
+	System map[string]string
 }
 
+// NewParams creates a new instance of Params and returns the pointer
 func NewParams() *Params {
 	return &Params{
 		Package: make([]string, 0),
@@ -19,16 +22,21 @@ func NewParams() *Params {
 	}
 }
 
+// Get returns the goldorf parameter with given name
 func (p *Params) Get(name string) string {
 	return p.System[name]
 }
 
+// CloneRun copies run parameter value to watch parameter in-case watch
+// parameter does not exist
 func (p *Params) CloneRun() {
 	if p.System["watch"] == "" && p.System["run"] != "" {
 		p.System["watch"] = p.System["run"]
 	}
 }
 
+// runCommand runs the command with given name and arguments. It copies the
+// logs to standard output
 func runCommand(name string, args ...string) (*exec.Cmd, error) {
 	cmd := exec.Command(name, args...)
 	stderr, err := cmd.StderrPipe()
@@ -51,6 +59,8 @@ func runCommand(name string, args ...string) (*exec.Cmd, error) {
 	return cmd, nil
 }
 
+// prepareArgs filters the system parameters from package parameters
+// and returns Params instance
 func prepareArgs() *Params {
 
 	params := NewParams()
@@ -82,6 +92,7 @@ func prepareArgs() *Params {
 	return params
 }
 
+// stripDash removes the dash chars and returns parameter name
 func stripDash(arg string) string {
 	if len(arg) > 2 {
 		if arg[1] == '-' {

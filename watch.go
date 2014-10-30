@@ -12,6 +12,8 @@ import (
 	"gopkg.in/fsnotify.v1"
 )
 
+// Watcher watches the file change events from fsnotify and
+// sends update messages. It is also used as a fsnotify.Watcher wrapper
 type Watcher struct {
 	rootdir string
 	watcher *fsnotify.Watcher
@@ -20,6 +22,8 @@ type Watcher struct {
 
 var ErrPathNotSet = errors.New("gopath not set")
 
+// MustRegisterWatcher creates a new Watcher and starts listening
+// given folders
 func MustRegisterWatcher(params *Params) *Watcher {
 
 	w := &Watcher{
@@ -68,15 +72,17 @@ func (w *Watcher) ListenChanges() {
 	}
 }
 
+// Close closes the fsnotify watcher channel
 func (w *Watcher) Close() {
 	w.watcher.Close()
 }
 
+// Wait waits till a message is sent via update channel
 func (w *Watcher) Wait() {
 	<-w.update
 }
 
-// send update signal for initial package build
+// ForceUpdate sends a forced update signal for initial package build
 func (w *Watcher) ForceUpdate() {
 	w.update <- struct{}{}
 }
@@ -119,6 +125,7 @@ func (w *Watcher) addFolder(name string) {
 	}
 }
 
+// prepareRootDir prepares working directory depending on root directory
 func (w *Watcher) prepareRootDir() (string, error) {
 	if w.rootdir == "" {
 		return os.Getwd()

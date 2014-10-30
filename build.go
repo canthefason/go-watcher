@@ -6,6 +6,8 @@ import (
 	"syscall"
 )
 
+// build listens watch events from Watcher and sends messages to Runner
+// when new changes are built.
 func build(w *Watcher, r *Runner, p *Params) {
 	for {
 		w.Wait()
@@ -42,7 +44,7 @@ func build(w *Watcher, r *Runner, p *Params) {
 }
 
 // interpretError checks the error, and returns nil if it is
-// an exit code 2 error. Otherwise error is returned as it is
+// an exit code 2 error. Otherwise error is returned as it is.
 // when a compilation error occurres, it returns with code 2.
 func interpretError(err error) error {
 	exiterr, ok := err.(*exec.ExitError)

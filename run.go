@@ -5,12 +5,15 @@ import (
 	"log"
 )
 
+// Runner listens change events and depending on that kills
+// the obsolete process, and runs the new one
 type Runner struct {
 	running bool
 	start   chan struct{}
 	kill    chan struct{}
 }
 
+// NewRunner creates a new Runner instance and returns its pointer
 func NewRunner() *Runner {
 	return &Runner{
 		running: false,
@@ -19,6 +22,7 @@ func NewRunner() *Runner {
 	}
 }
 
+// Init initializes runner with given parameters.
 func (r *Runner) Init(p *Params) {
 
 	for {
@@ -51,10 +55,13 @@ func prepareBinaryName(name string) string {
 	return fmt.Sprintf("./%s", name)
 }
 
+// Run runs the built package command
 func (r *Runner) Run() {
 	r.start <- struct{}{}
 }
 
+// Kill kills the obsolete process if the command is
+// running
 func (r *Runner) Kill() {
 	if r.running {
 		r.kill <- struct{}{}
