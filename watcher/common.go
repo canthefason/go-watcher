@@ -64,11 +64,9 @@ func runCommand(name string, args ...string) (*exec.Cmd, error) {
 
 // PrepareArgs filters the system parameters from package parameters
 // and returns Params instance
-func PrepareArgs() *Params {
+func PrepareArgs(args []string) *Params {
 
 	params := NewParams()
-
-	args := os.Args
 
 	// remove command
 	args = args[1:len(args)]
@@ -97,7 +95,7 @@ func PrepareArgs() *Params {
 
 // stripDash removes the dash chars and returns parameter name
 func stripDash(arg string) string {
-	if len(arg) > 2 {
+	if len(arg) > 1 {
 		if arg[1] == '-' {
 			return arg[2:]
 		} else if arg[0] == '-' {

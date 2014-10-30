@@ -4,10 +4,14 @@
 // goldorf -c config -p 7000 -h localhost
 package main
 
-import "github.com/canthefason/goldorf/watcher"
+import (
+	"os"
+
+	"github.com/canthefason/goldorf/watcher"
+)
 
 func main() {
-	params := watcher.PrepareArgs()
+	params := watcher.PrepareArgs(os.Args)
 
 	w := watcher.MustRegisterWatcher(params)
 	defer w.Close()
