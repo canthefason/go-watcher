@@ -4,24 +4,23 @@
 // goldorf -c config -p 7000 -h localhost
 package main
 
-// Binary name used for built package
-const binaryName = "goldorf-main"
+import "github.com/canthefason/goldorf/watcher"
 
 func main() {
-	params := prepareArgs()
+	params := watcher.PrepareArgs()
 
-	w := MustRegisterWatcher(params)
+	w := watcher.MustRegisterWatcher(params)
 	defer w.Close()
 
 	done := make(chan struct{})
 
-	r := NewRunner()
+	r := watcher.NewRunner()
 
 	// wait for build and run the binary with given params
 	go r.Init(params)
 
 	// build given package
-	go build(w, r, params)
+	go watcher.Build(w, r, params)
 
 	// force update for initial package build
 	go w.ForceUpdate()

@@ -1,4 +1,4 @@
-package main
+package watcher
 
 import (
 	"log"
@@ -6,9 +6,9 @@ import (
 	"syscall"
 )
 
-// build listens watch events from Watcher and sends messages to Runner
+// Build listens watch events from Watcher and sends messages to Runner
 // when new changes are built.
-func build(w *Watcher, r *Runner, p *Params) {
+func Build(w *Watcher, r *Runner, p *Params) {
 	for {
 		w.Wait()
 
