@@ -36,11 +36,15 @@ Goldorf works like your native binary package. You can pass all the arguments th
 When you run the command it starts watching folders recursively, starting from the current working directory. It only watches .go and .tmpl files and ignores hidden folders.
 
 ##### Rootpackage (God mode on)
-  `goldorf -c config -rootpackage github.com/username/somerootpackagename`
+  `goldorf -c config -run github.com/username/somerootpackagename`
+  
+When your GOPATH is set, you can run your apps via their package names with -run parameter. By default it watches the underlying folder with subfolders. 
 
-For the cases where your app depends on a few packages that are still WIP, and you want to watch all the changes including those packages, you can pass a root package name to goldorf.
+  `goldorf -c config -run github.com/username/somerootpackagename -watch github.com/username`
 
-Micro management of the watched packages are not supported.
+For the cases where your app depends on a few packages that are still in development, and you want to watch all the changes including those packages, you can pass a different package name for watching with -watch parameter.
+
+Micro management of the watched packages are not supported yet. So you cannot exclude any folders.
 
 ## Name inspiration
 
