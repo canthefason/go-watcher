@@ -1,9 +1,6 @@
 package watcher
 
-import (
-	"fmt"
-	"log"
-)
+import "log"
 
 // Runner listens change events and depending on that kills
 // the obsolete process, and runs the new one
@@ -30,7 +27,7 @@ func (r *Runner) Init(p *Params) {
 
 		log.Printf("Running %s...\n", p.Get("run"))
 
-		cmd, err := runCommand(prepareBinaryName(binaryName), p.Package...)
+		cmd, err := runCommand(getBinaryName(), p.Package...)
 		if err != nil {
 			log.Println("Could not run the go binary: %s", err)
 			continue
@@ -49,10 +46,6 @@ func (r *Runner) Init(p *Params) {
 		}()
 
 	}
-}
-
-func prepareBinaryName(name string) string {
-	return fmt.Sprintf("./%s", name)
 }
 
 // Run runs the built package command

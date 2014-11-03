@@ -1,6 +1,7 @@
 package watcher
 
 import (
+	"fmt"
 	"io"
 	"log"
 	"os"
@@ -36,6 +37,16 @@ func (p *Params) CloneRun() {
 	if p.System["watch"] == "" && p.System["run"] != "" {
 		p.System["watch"] = p.System["run"]
 	}
+}
+
+// GetBinaryName prepares binary name with GOPATH if it is set
+func getBinaryName() string {
+	path := os.Getenv("GOPATH")
+	if path != "" {
+		return fmt.Sprintf("%s/bin/%s", path, binaryName)
+	}
+
+	return binaryName
 }
 
 // runCommand runs the command with given name and arguments. It copies the

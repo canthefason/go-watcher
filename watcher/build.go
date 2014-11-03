@@ -19,7 +19,7 @@ func Build(w *Watcher, r *Runner, p *Params) {
 
 		log.Printf("Building %s...\n", run)
 
-		cmd, err := runCommand("go", "build", "-o", binaryName, run)
+		cmd, err := runCommand("go", "build", "-o", getBinaryName(), run)
 		if err != nil {
 			log.Fatalf("Could not run 'go build' command: %s", err)
 			continue
