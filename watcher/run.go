@@ -2,6 +2,7 @@ package watcher
 
 import (
 	"log"
+	"sync"
 
 	"github.com/fatih/color"
 )
@@ -12,6 +13,8 @@ type Runner struct {
 	running bool
 	start   chan struct{}
 	kill    chan struct{}
+
+	mu *sync.Mutex
 }
 
 // NewRunner creates a new Runner instance and returns its pointer
@@ -20,6 +23,7 @@ func NewRunner() *Runner {
 		running: false,
 		start:   make(chan struct{}),
 		kill:    make(chan struct{}),
+		mu:      &sync.Mutex{},
 	}
 }
 
@@ -38,7 +42,9 @@ func (r *Runner) Init(p *Params) {
 		}
 
 		go func() {
+			r.mu.Lock()
 			r.running = true
+			r.mu.Unlock()
 			cmd.Wait()
 		}()
 
@@ -57,8 +63,8 @@ func (r *Runner) Run() {
 	r.start <- struct{}{}
 }
 
-// Kill kills the obsolete process if the command is
-// running
+// Kill kills the obsolete process when the command is
+// still running
 func (r *Runner) Kill() {
 	if r.running {
 		r.kill <- struct{}{}
