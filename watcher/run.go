@@ -1,6 +1,10 @@
 package watcher
 
-import "log"
+import (
+	"log"
+
+	"github.com/fatih/color"
+)
 
 // Runner listens change events and depending on that kills
 // the obsolete process, and runs the new one
@@ -25,7 +29,7 @@ func (r *Runner) Init(p *Params) {
 	for {
 		<-r.start
 
-		log.Printf("Running %s...\n", p.Get("run"))
+		color.Green("Running %s...\n", p.Get("run"))
 
 		cmd, err := runCommand(getBinaryName(), p.Package...)
 		if err != nil {

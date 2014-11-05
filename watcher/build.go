@@ -4,6 +4,8 @@ import (
 	"log"
 	"os/exec"
 	"syscall"
+
+	"github.com/fatih/color"
 )
 
 // Build listens watch events from Watcher and sends messages to Runner
@@ -17,7 +19,7 @@ func Build(w *Watcher, r *Runner, p *Params) {
 			run = "."
 		}
 
-		log.Printf("Building %s...\n", run)
+		color.Cyan("Building %s...\n", run)
 
 		cmd, err := runCommand("go", "build", "-o", getBinaryName(), run)
 		if err != nil {
@@ -30,7 +32,7 @@ func Build(w *Watcher, r *Runner, p *Params) {
 				log.Fatal("An error occurred while building")
 			}
 
-			log.Println("A build error occurred. Please update your code...")
+			color.Red("A build error occurred. Please update your code...")
 
 			continue
 		}
