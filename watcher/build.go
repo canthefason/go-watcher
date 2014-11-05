@@ -29,10 +29,10 @@ func Build(w *Watcher, r *Runner, p *Params) {
 
 		if err := cmd.Wait(); err != nil {
 			if err := interpretError(err); err != nil {
-				log.Fatal("An error occurred while building")
+				color.Red("An error occurred while building: %s", err)
+			} else {
+				color.Red("A build error occurred. Please update your code...")
 			}
-
-			color.Red("A build error occurred. Please update your code...")
 
 			continue
 		}
