@@ -8,22 +8,29 @@ import (
 	"github.com/fatih/color"
 )
 
-var oldFileName string
+type Builder struct {
+	runner       *Runner
+	watcher      *Watcher
+	prevFileName string
+}
+
+func NewBuilder(w *Watcher, r *Runner) *Builder {
+	return &Builder{watcher: w, runner: r}
+}
 
 // Build listens watch events from Watcher and sends messages to Runner
 // when new changes are built.
-func Build(w *Watcher, r *Runner, p *Params) {
+func (b *Builder) Build(p *Params) {
 	for {
-		w.Wait()
+		// wait for changes from watcher
+		b.watcher.Wait()
 
-		run := p.Get("run")
-		if run == "" {
-			run = "."
-		}
+		run := p.GetPackage()
 
 		color.Cyan("Building %s...\n", run)
 
 		fileName := getBinaryName()
+		// build package
 		cmd, err := runCommand("go", "build", "-o", fileName, run)
 		if err != nil {
 			log.Fatalf("Could not run 'go build' command: %s", err)
@@ -41,12 +48,12 @@ func Build(w *Watcher, r *Runner, p *Params) {
 		}
 
 		// when binary is successfully updated, kill the old running process
-		r.Kill(oldFileName)
+		b.runner.Kill(b.prevFileName)
 
-		oldFileName = fileName
+		b.prevFileName = fileName
 
 		// and start the new process
-		r.Run(fileName)
+		b.runner.Run(fileName)
 	}
 }
 

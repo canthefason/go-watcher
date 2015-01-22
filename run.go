@@ -1,3 +1,7 @@
+// Watcher is a command line tool inspired by fresh (https://github.com/pilu/fresh) and used
+// for watching .go file changes, and restarting the app in case of an update/delete/add operation.
+// After you installed it, you can run your apps with their default parameters as:
+// watcher -c config -p 7000 -h localhost
 package watcher
 
 import (
@@ -34,12 +38,7 @@ func NewRunner() *Runner {
 // Init initializes runner with given parameters.
 func (r *Runner) Init(p *Params) {
 	for {
-		var fileName string
-		select {
-		case fileName = <-r.start:
-		case <-r.done:
-			return
-		}
+		fileName := <-r.start
 
 		color.Green("Running %s...\n", p.Get("run"))
 
@@ -57,7 +56,7 @@ func (r *Runner) Init(p *Params) {
 			cmd.Wait()
 		}(fileName)
 
-		go func() {
+		go func(c *exec.Cmd) {
 			select {
 			case obsoleteFileName := <-r.kill:
 				pid := cmd.Process.Pid
@@ -68,7 +67,7 @@ func (r *Runner) Init(p *Params) {
 					cmd.Run()
 				}
 			}
-		}()
+		}(cmd)
 
 	}
 }
@@ -91,3 +90,8 @@ func (r *Runner) Close() {
 	close(r.kill)
 	close(r.start)
 }
+
+func (r *Runner) Wait() {
+	<-r.done
+}
+
