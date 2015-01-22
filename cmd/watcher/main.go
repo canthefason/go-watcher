@@ -22,9 +22,10 @@ func main() {
 
 	// wait for build and run the binary with given params
 	go r.Init(params)
+	b := watcher.NewBuilder(w, r)
 
 	// build given package
-	go watcher.Build(w, r, params)
+	go b.Build(params)
 
 	// force update for initial package build
 	go w.ForceUpdate()
