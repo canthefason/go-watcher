@@ -11,12 +11,12 @@ import (
 )
 
 // Binary name used for built package
-const binaryName = "goldorf-main"
+const binaryName = "watcher-main"
 
 type Params struct {
 	// Package parameters
 	Package []string
-	// Goldorf parameters
+	// Go-Watcher parameters
 	System map[string]string
 }
 
@@ -28,7 +28,7 @@ func NewParams() *Params {
 	}
 }
 
-// Get returns the goldorf parameter with given name
+// Get returns the watcher parameter with given name
 func (p *Params) Get(name string) string {
 	return p.System[name]
 }
@@ -39,6 +39,15 @@ func (p *Params) CloneRun() {
 	if p.System["watch"] == "" && p.System["run"] != "" {
 		p.System["watch"] = p.System["run"]
 	}
+}
+
+func (p *Params) GetPackage() string {
+	run := p.Get("run")
+	if run != "" {
+		return run
+	}
+
+	return "."
 }
 
 // GetBinaryName prepares binary name with GOPATH if it is set

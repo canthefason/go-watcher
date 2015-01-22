@@ -53,6 +53,7 @@ func (w *Watcher) ListenChanges() {
 	for {
 		select {
 		case event := <-w.watcher.Events:
+			// discard chmod events
 			if event.Op&fsnotify.Chmod != fsnotify.Chmod {
 				ext := filepath.Ext(event.Name)
 				if ext == ".go" || ext == ".tmpl" {
