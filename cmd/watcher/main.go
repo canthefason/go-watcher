@@ -7,7 +7,7 @@ package main
 import (
 	"os"
 
-	"github.com/canthefason/goldorf/watcher"
+	watcher "github.com/canthefason/go-watcher"
 )
 
 func main() {
@@ -15,8 +15,6 @@ func main() {
 
 	w := watcher.MustRegisterWatcher(params)
 	defer w.Close()
-
-	done := make(chan struct{})
 
 	r := watcher.NewRunner()
 
@@ -33,5 +31,5 @@ func main() {
 	// listen for further changes
 	go w.ListenChanges()
 
-	<-done
+	r.Wait()
 }

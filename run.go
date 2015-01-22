@@ -91,3 +91,8 @@ func (r *Runner) Close() {
 	close(r.kill)
 	close(r.start)
 }
+
+func (r *Runner) Wait() {
+	<-r.done
+}
+
