@@ -51,7 +51,7 @@ func (p *Params) GetPackage() string {
 }
 
 // GetBinaryName prepares binary name with GOPATH if it is set
-func getBinaryName() string {
+func createBinaryName() string {
 	rand.Seed(time.Now().UnixNano())
 	randName := rand.Int31n(999999)
 

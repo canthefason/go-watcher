@@ -15,17 +15,14 @@ func main() {
 	r := watcher.NewRunner()
 
 	// wait for build and run the binary with given params
-	go r.Init(params)
+	go r.Run(params)
 	b := watcher.NewBuilder(w, r)
 
 	// build given package
 	go b.Build(params)
 
-	// force update for initial package build
-	go w.ForceUpdate()
-
 	// listen for further changes
-	go w.ListenChanges()
+	go w.Watch()
 
 	r.Wait()
 }

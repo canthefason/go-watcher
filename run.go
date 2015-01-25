@@ -17,9 +17,9 @@ import (
 type Runner struct {
 	running  bool
 	start    chan string
-	kill     chan string
 	done     chan struct{}
 	fileName string
+	cmd      *exec.Cmd
 
 	mu *sync.Mutex
 }
@@ -29,69 +29,66 @@ func NewRunner() *Runner {
 	return &Runner{
 		running: false,
 		start:   make(chan string),
-		kill:    make(chan string),
 		done:    make(chan struct{}),
 		mu:      &sync.Mutex{},
 	}
 }
 
 // Init initializes runner with given parameters.
-func (r *Runner) Init(p *Params) {
-	for {
-		fileName := <-r.start
+func (r *Runner) Run(p *Params) {
+	for fileName := range r.start {
 
 		color.Green("Running %s...\n", p.Get("run"))
 
 		cmd, err := runCommand(fileName, p.Package...)
 		if err != nil {
-			log.Println("Could not run the go binary: %s", err)
+			log.Printf("Could not run the go binary: %s", err)
 			continue
 		}
+		r.cmd = cmd
 
 		go func(name string) {
 			r.mu.Lock()
 			r.running = true
 			r.fileName = name
 			r.mu.Unlock()
-			cmd.Wait()
+			r.cmd.Wait()
 		}(fileName)
-
-		go func(c *exec.Cmd) {
-			select {
-			case obsoleteFileName := <-r.kill:
-				pid := cmd.Process.Pid
-				log.Printf("Killing PID %d \n", pid)
-				cmd.Process.Kill()
-				if obsoleteFileName != "" {
-					cmd := exec.Command("rm", obsoleteFileName)
-					cmd.Run()
-				}
-			}
-		}(cmd)
-
 	}
 }
 
-// Run runs the built package command
-func (r *Runner) Run(fileName string) {
+// Restart kills the process, removes the old binary and
+// restarts the new process
+func (r *Runner) restart(fileName string) {
+	if r.running {
+		r.kill()
+		r.removeFile()
+	}
+
 	r.start <- fileName
 }
 
-// Kill kills the obsolete process when the command is
-// still running
-func (r *Runner) Kill(fileName string) {
-	if r.running {
-		r.kill <- fileName
+func (r *Runner) kill() {
+	pid := r.cmd.Process.Pid
+	log.Printf("Killing PID %d \n", pid)
+	r.cmd.Process.Kill()
+}
+
+func (r *Runner) removeFile() {
+	if r.fileName != "" {
+		cmd := exec.Command("rm", r.fileName)
+		cmd.Run()
+		cmd.Wait()
 	}
 }
 
 func (r *Runner) Close() {
-	r.kill <- r.fileName
-	close(r.kill)
+	r.kill()
+	r.removeFile()
 	close(r.start)
+	close(r.done)
 }
 
 func (r *Runner) Wait() {
 	<-r.done
 }
-
