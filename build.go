@@ -24,10 +24,10 @@ func NewBuilder(w *Watcher, r *Runner) *Builder {
 func (b *Builder) Build(p *Params) {
 	go b.registerSignalHandler()
 	go func() {
-		b.watcher.update <- struct{}{}
+		b.watcher.update <- true
 	}()
 
-	for range b.watcher.Wait() {
+	for <-b.watcher.Wait() {
 		fileName := createBinaryName()
 
 		pkg := p.GetPackage()

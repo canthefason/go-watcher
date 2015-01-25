@@ -20,7 +20,7 @@ type Watcher struct {
 	rootdir string
 	watcher *fsnotify.Watcher
 	// when file is changed a message is sent to update channel
-	update chan struct{}
+	update chan bool
 }
 
 // GoPath not set error
@@ -31,7 +31,7 @@ var ErrPathNotSet = errors.New("gopath not set")
 func MustRegisterWatcher(params *Params) *Watcher {
 
 	w := &Watcher{
-		update:  make(chan struct{}),
+		update:  make(chan bool),
 		rootdir: params.Get("watch"),
 	}
 
@@ -67,7 +67,7 @@ func (w *Watcher) Watch() {
 							time.Sleep(200 * time.Millisecond)
 							eventSent = false
 						}()
-						w.update <- struct{}{}
+						w.update <- true
 					}
 				}
 
@@ -81,7 +81,7 @@ func (w *Watcher) Watch() {
 	}
 }
 
-func (w *Watcher) Wait() <-chan struct{} {
+func (w *Watcher) Wait() <-chan bool {
 	return w.update
 }
 
