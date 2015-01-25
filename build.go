@@ -28,7 +28,7 @@ func (b *Builder) Build(p *Params) {
 	}()
 
 	for <-b.watcher.Wait() {
-		fileName := createBinaryName()
+		fileName := p.createBinaryName()
 
 		pkg := p.GetPackage()
 

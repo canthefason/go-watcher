@@ -7,11 +7,12 @@ import (
 	"math/rand"
 	"os"
 	"os/exec"
+	"strings"
 	"time"
 )
 
 // Binary name used for built package
-const binaryName = "watcher-main"
+const binaryName = "watcher"
 
 type Params struct {
 	// Package parameters
@@ -51,11 +52,12 @@ func (p *Params) GetPackage() string {
 }
 
 // GetBinaryName prepares binary name with GOPATH if it is set
-func createBinaryName() string {
+func (p *Params) createBinaryName() string {
 	rand.Seed(time.Now().UnixNano())
 	randName := rand.Int31n(999999)
+	packageName := strings.Replace(p.GetPackage(), "/", "-", -1)
 
-	return fmt.Sprintf("%s-%d", getBinaryNameRoot(), randName)
+	return fmt.Sprintf("%s-%s-%d", getBinaryNameRoot(), packageName, randName)
 }
 
 func getBinaryNameRoot() string {
@@ -65,10 +67,6 @@ func getBinaryNameRoot() string {
 	}
 
 	return path
-}
-
-func removeOldFiles() {
-	exec.Command("rm", fmt.Sprintf("%s-*", getBinaryNameRoot()))
 }
 
 // runCommand runs the command with given name and arguments. It copies the
