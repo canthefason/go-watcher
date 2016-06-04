@@ -8,34 +8,45 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"time"
 
 	fsnotify "gopkg.in/fsnotify.v1"
 )
 
+// GoPath not set error
+var ErrPathNotSet = errors.New("gopath not set")
+
 // Watcher watches the file change events from fsnotify and
 // sends update messages. It is also used as a fsnotify.Watcher wrapper
 type Watcher struct {
-	rootdir string
-	watcher *fsnotify.Watcher
+	rootdir     string
+	watcher     *fsnotify.Watcher
+	watchVendor bool
 	// when file is changed a message is sent to update channel
 	update chan bool
 }
 
-// GoPath not set error
-var ErrPathNotSet = errors.New("gopath not set")
-
 // MustRegisterWatcher creates a new Watcher and starts listening
 // given folders
 func MustRegisterWatcher(params *Params) *Watcher {
-
-	w := &Watcher{
-		update:  make(chan bool),
-		rootdir: params.Get("watch"),
+	watchVendorStr := params.Get("watch-vendor")
+	var watchVendor bool
+	var err error
+	if watchVendorStr != "" {
+		watchVendor, err = strconv.ParseBool(watchVendorStr)
+		if err != nil {
+			log.Println("Wrong watch-vendor value: %s (default=false)", watchVendorStr)
+		}
 	}
 
-	var err error
+	w := &Watcher{
+		update:      make(chan bool),
+		rootdir:     params.Get("watch"),
+		watchVendor: watchVendor,
+	}
+
 	w.watcher, err = fsnotify.NewWatcher()
 	if err != nil {
 		log.Fatalf("Could not register watcher: %s", err)
@@ -57,6 +68,10 @@ func (w *Watcher) Watch() {
 		case event := <-w.watcher.Events:
 			// discard chmod events
 			if event.Op&fsnotify.Chmod != fsnotify.Chmod {
+				// test files do not need a rebuild
+				if strings.HasSuffix(filepath.Base(event.Name), "_test.go") {
+					continue
+				}
 				ext := filepath.Ext(event.Name)
 				if ext == ".go" || ext == ".tmpl" {
 					if !eventSent {
@@ -108,6 +123,14 @@ func (w *Watcher) watchFolders() {
 
 		if !info.IsDir() {
 			return nil
+		}
+
+		if !w.watchVendor {
+			// skip vendor directory
+			vendor := fmt.Sprintf("%s/vendor", wd)
+			if strings.HasPrefix(path, vendor) {
+				return filepath.SkipDir
+			}
 		}
 
 		// skip hidden folders

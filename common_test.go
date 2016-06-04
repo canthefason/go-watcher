@@ -4,7 +4,7 @@ import "testing"
 
 func TestParamsGet(t *testing.T) {
 	params := NewParams()
-	params.System["run"] = "statler"
+	params.Watcher["run"] = "statler"
 
 	run := params.Get("run")
 	if run != "statler" {
@@ -15,7 +15,7 @@ func TestParamsGet(t *testing.T) {
 
 func TestParamsClone(t *testing.T) {
 	params := NewParams()
-	params.System["run"] = "statler"
+	params.Watcher["run"] = "statler"
 
 	params.CloneRun()
 	watch := params.Get("watch")
@@ -23,7 +23,7 @@ func TestParamsClone(t *testing.T) {
 		t.Error("Expected statler but got %s when watch param is not set", watch)
 	}
 
-	params.System["watch"] = "waldorf"
+	params.Watcher["watch"] = "waldorf"
 
 	params.CloneRun()
 
@@ -50,12 +50,12 @@ func TestPrepareArgs(t *testing.T) {
 		t.Errorf("Expected --host as package parameter but got %s", params.Package[0])
 	}
 
-	if len(params.System) != 2 {
-		t.Fatalf("Expected 2 parameter with their values in System parameters but got %d", len(params.System))
+	if len(params.Watcher) != 2 {
+		t.Fatalf("Expected 2 parameter with their values in System parameters but got %d", len(params.Watcher))
 	}
 
-	if params.System["run"] != "balcony" {
-		t.Errorf("Expected balcony but got %s", params.System["run"])
+	if params.Watcher["run"] != "balcony" {
+		t.Errorf("Expected balcony but got %s", params.Watcher["run"])
 	}
 
 	// TODO check this fatal error case

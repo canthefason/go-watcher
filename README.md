@@ -3,7 +3,7 @@ Watcher [![GoDoc](https://godoc.org/github.com/canthefason/go-watcher?status.svg
 
 Watcher is a command line tool inspired by [fresh](https://github.com/pilu/fresh) and used for watching .go file changes, and restarting the app in case of an update/delete/add operation.
 
-File change event listening infrastructure depends on stable version (.v1) of [fsnotify](https://github.com/go-fsnotify/fsnotify)
+Most of the existing file watchers have a configuration burden, and even though Go has a really short build time, this configuration burden makes your binaries really hard to run right away. With Watcher, we aimed simplicity in configuration, and tried to make it as simple as possible.
 
 ## Installation
 
@@ -15,7 +15,7 @@ File change event listening infrastructure depends on stable version (.v1) of [f
 
   `go install github.com/canthefason/go-watcher/cmd/watcher`
 
-  If not added please append your go/bin folder to PATH environment variable.
+  After this step, please make sure that your go/bin folder is appended to PATH environment variable.
 
 ## Usage
 
@@ -25,7 +25,7 @@ Start watcher:
 
   `watcher`
 
-Watcher works like your native binary package. You can pass all the arguments that you are currently using.
+Watcher works like your native package binary. You can pass all your existing package arguments to the Watcher, which really lowers the learning curve of the package, and makes it practical.
 
 ##### Current app usage
   `myapp -c config -p 7000 -h localhost`
@@ -33,18 +33,21 @@ Watcher works like your native binary package. You can pass all the arguments th
 ##### With watcher
   `watcher -c config -p 7000 -h localhost`
 
-When you run the command it starts watching folders recursively, starting from the current working directory. It only watches .go and .tmpl files and ignores hidden folders.
+As you can see nothing changed between these two calls. When you run the command, Watcher starts watching folders recursively, starting from the current working directory. It only watches .go and .tmpl files and ignores hidden folders and _test.go files.
 
 ##### Package dependency
+
+By default Watcher recursively watches all files/folders under working directory. If you prefer to use it like `go run`, you can call watcher with -run flag anywhere you want (we assume that your GOPATH is properly set).
+
   `watcher -c config -run github.com/username/somerootpackagename`
 
-When your GOPATH is set, you can run your apps via their package names with -run parameter. By default it watches the underlying folder with subfolders.
+For the cases where your main function is in another directory other than the dependant package, you can do this by passing a different package name to -watch parameter.
 
   `watcher -c config -run github.com/username/somerootpackagename -watch github.com/username`
 
-For the cases where your app depends on a few packages that are still in development, and you want to watch all the changes including those packages, you can pass a different package name for watching with -watch parameter.
 
-Micro management of the watched packages are not supported yet. So you cannot exclude any folders.
+##### Vendor directory
+Since Globs and some optional folder arrays will make it harder to configure, we are not planning to have support for a configurable watched folder structure. Only configuration we have here is, by default we have excluded vendor/ folder from watched directories. If your intention is making some changes in place, you can set -watch-vendor flag as "true", and start watching vendor directory.
 
 ## Author
 

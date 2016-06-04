@@ -18,27 +18,27 @@ type Params struct {
 	// Package parameters
 	Package []string
 	// Go-Watcher parameters
-	System map[string]string
+	Watcher map[string]string
 }
 
 // NewParams creates a new instance of Params and returns the pointer
 func NewParams() *Params {
 	return &Params{
 		Package: make([]string, 0),
-		System:  make(map[string]string),
+		Watcher: make(map[string]string),
 	}
 }
 
 // Get returns the watcher parameter with given name
 func (p *Params) Get(name string) string {
-	return p.System[name]
+	return p.Watcher[name]
 }
 
 // CloneRun copies run parameter value to watch parameter in-case watch
 // parameter does not exist
 func (p *Params) CloneRun() {
-	if p.System["watch"] == "" && p.System["run"] != "" {
-		p.System["watch"] = p.System["run"]
+	if p.Watcher["watch"] == "" && p.Watcher["run"] != "" {
+		p.Watcher["watch"] = p.Watcher["run"]
 	}
 }
 
@@ -106,12 +106,16 @@ func PrepareArgs(args []string) *Params {
 		arg := args[i]
 		arg = stripDash(arg)
 
-		if arg == "run" || arg == "watch" {
+		if arg == "run" || arg == "watch" || arg == "watch-vendor" {
 			if len(args) <= i+1 {
 				log.Fatalf("missing parameter value: %s", arg)
 			}
 
-			params.System[arg] = args[i+1]
+			if strings.HasPrefix(args[i+1], "-") {
+				log.Fatalf("missing parameter value: %s", arg)
+			}
+
+			params.Watcher[arg] = args[i+1]
 			i++
 			continue
 		}
