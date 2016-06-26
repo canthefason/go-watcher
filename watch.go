@@ -20,7 +20,7 @@ var ErrPathNotSet = errors.New("gopath not set")
 
 var watchedFileExt = []string{".go", ".tmpl", ".tpl", ".html"}
 
-var watchDelta = 500 * time.Millisecond
+var watchDelta = 1000 * time.Millisecond
 
 // Watcher watches the file change events from fsnotify and
 // sends update messages. It is also used as a fsnotify.Watcher wrapper
