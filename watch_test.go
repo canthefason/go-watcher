@@ -35,3 +35,28 @@ func TestPrepareRootDir(t *testing.T) {
 		t.Errorf("Expected go/src/balcony but got %s for prepareRootDir", dir)
 	}
 }
+
+func TestIsTestFile(t *testing.T) {
+	fileName := "/go/src/github.com/canthefason/go-watcher/common.go"
+	if isTestFile(fileName) {
+		t.Error("expected false, got true")
+	}
+
+	fileName = "/go/src/github.com/canthefason/go-watcher/common_test.go"
+	if !isTestFile(fileName) {
+		t.Error("expected true, got false")
+	}
+}
+
+func TestIsWatchedFileType(t *testing.T) {
+	fileName := "/go/src/github.com/canthefason/go-watcher/common.go"
+	if !isWatchedFileType(fileName) {
+		t.Errorf("expected true, got false")
+	}
+
+	fileName = "/go/src/github.com/canthefason/go-watcher/README.md"
+
+	if isWatchedFileType(fileName) {
+		t.Errorf("expected true, got false")
+	}
+}

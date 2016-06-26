@@ -10,11 +10,13 @@ import (
 	"github.com/fatih/color"
 )
 
+// Builder composes of both runner and watcher. Whenever watcher gets notified, builder starts a build process, and forces the runner to restart
 type Builder struct {
 	runner  *Runner
 	watcher *Watcher
 }
 
+// NewBuilder constructs the Builder instance
 func NewBuilder(w *Watcher, r *Runner) *Builder {
 	return &Builder{watcher: w, runner: r}
 }
@@ -24,14 +26,16 @@ func NewBuilder(w *Watcher, r *Runner) *Builder {
 func (b *Builder) Build(p *Params) {
 	go b.registerSignalHandler()
 	go func() {
-		b.watcher.update <- true
+		// used for triggering the first build
+		b.watcher.update <- struct{}{}
 	}()
 
-	for <-b.watcher.Wait() {
-		fileName := p.createBinaryName()
+	for range b.watcher.Wait() {
+		fileName := p.generateBinaryName()
 
-		pkg := p.GetPackage()
+		pkg := p.packagePath()
 
+		log.Println("build started")
 		color.Cyan("Building %s...\n", pkg)
 
 		// build package
@@ -50,6 +54,7 @@ func (b *Builder) Build(p *Params) {
 
 			continue
 		}
+		log.Println("build completed")
 
 		// and start the new process
 		b.runner.restart(fileName)
@@ -57,18 +62,11 @@ func (b *Builder) Build(p *Params) {
 }
 
 func (b *Builder) registerSignalHandler() {
-	go func() {
-		signals := make(chan os.Signal, 1)
-		signal.Notify(signals)
-		for {
-			signal := <-signals
-			switch signal {
-			case syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT, syscall.SIGSTOP:
-				b.watcher.Close()
-				b.runner.Close()
-			}
-		}
-	}()
+	signals := make(chan os.Signal)
+	signal.Notify(signals, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
+	<-signals
+	b.watcher.Close()
+	b.runner.Close()
 }
 
 // interpretError checks the error, and returns nil if it is

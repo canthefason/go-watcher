@@ -3,14 +3,13 @@ package main
 import (
 	"os"
 
-	watcher "github.com/canthefason/go-watcher"
+	"github.com/canthefason/go-watcher"
 )
 
 func main() {
-	params := watcher.PrepareArgs(os.Args)
+	params := watcher.ParseArgs(os.Args)
 
 	w := watcher.MustRegisterWatcher(params)
-	defer w.Close()
 
 	r := watcher.NewRunner()
 

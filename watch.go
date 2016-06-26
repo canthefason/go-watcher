@@ -18,17 +18,21 @@ import (
 // GoPath not set error
 var ErrPathNotSet = errors.New("gopath not set")
 
+var watchedFileExt = []string{".go", ".tmpl", ".tpl", ".html"}
+
+var watchDelta = 500 * time.Millisecond
+
 // Watcher watches the file change events from fsnotify and
 // sends update messages. It is also used as a fsnotify.Watcher wrapper
 type Watcher struct {
 	rootdir     string
 	watcher     *fsnotify.Watcher
 	watchVendor bool
-	// when file is changed a message is sent to update channel
-	update chan bool
+	// when a file gets changed a message is sent to the update channel
+	update chan struct{}
 }
 
-// MustRegisterWatcher creates a new Watcher and starts listening
+// MustRegisterWatcher creates a new Watcher and starts listening to
 // given folders
 func MustRegisterWatcher(params *Params) *Watcher {
 	watchVendorStr := params.Get("watch-vendor")
@@ -42,7 +46,7 @@ func MustRegisterWatcher(params *Params) *Watcher {
 	}
 
 	w := &Watcher{
-		update:      make(chan bool),
+		update:      make(chan struct{}),
 		rootdir:     params.Get("watch"),
 		watchVendor: watchVendor,
 	}
@@ -52,14 +56,14 @@ func MustRegisterWatcher(params *Params) *Watcher {
 		log.Fatalf("Could not register watcher: %s", err)
 	}
 
-	// add watched paths
+	// add folders that will be watched
 	w.watchFolders()
 
 	return w
 }
 
 // Watch listens file updates, and sends signal to
-// update channel when go files are updated
+// update channel when .go and .tmpl files are updated
 func (w *Watcher) Watch() {
 	eventSent := false
 
@@ -69,22 +73,22 @@ func (w *Watcher) Watch() {
 			// discard chmod events
 			if event.Op&fsnotify.Chmod != fsnotify.Chmod {
 				// test files do not need a rebuild
-				if strings.HasSuffix(filepath.Base(event.Name), "_test.go") {
+				if isTestFile(event.Name) {
 					continue
 				}
-				ext := filepath.Ext(event.Name)
-				if ext == ".go" || ext == ".tmpl" {
-					if !eventSent {
-
-						// prevent consequent build
-						eventSent = true
-						go func() {
-							time.Sleep(200 * time.Millisecond)
-							eventSent = false
-						}()
-						w.update <- true
-					}
+				if !isWatchedFileType(event.Name) {
+					continue
 				}
+				if eventSent {
+					continue
+				}
+				eventSent = true
+				// prevent consequent builds
+				go func() {
+					w.update <- struct{}{}
+					time.Sleep(watchDelta)
+					eventSent = false
+				}()
 
 			}
 		case err := <-w.watcher.Errors:
@@ -96,17 +100,28 @@ func (w *Watcher) Watch() {
 	}
 }
 
-func (w *Watcher) Wait() <-chan bool {
+func isTestFile(fileName string) bool {
+	return strings.HasSuffix(filepath.Base(fileName), "_test.go")
+}
+
+func isWatchedFileType(fileName string) bool {
+	ext := filepath.Ext(fileName)
+
+	return existIn(ext, watchedFileExt)
+}
+
+// Wait waits for the latest messages
+func (w *Watcher) Wait() <-chan struct{} {
 	return w.update
 }
 
 // Close closes the fsnotify watcher channel
 func (w *Watcher) Close() {
 	w.watcher.Close()
-	// close(w.update)
+	close(w.update)
 }
 
-// watchFolders recursively adds folders that will be watched for changes,
+// watchFolders recursively adds folders that will be watched against the changes,
 // starting from the working directory
 func (w *Watcher) watchFolders() {
 	wd, err := w.prepareRootDir()

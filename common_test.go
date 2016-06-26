@@ -17,7 +17,7 @@ func TestParamsClone(t *testing.T) {
 	params := NewParams()
 	params.Watcher["run"] = "statler"
 
-	params.CloneRun()
+	params.cloneRunFlag()
 	watch := params.Get("watch")
 	if watch != "statler" {
 		t.Error("Expected statler but got %s when watch param is not set", watch)
@@ -25,7 +25,7 @@ func TestParamsClone(t *testing.T) {
 
 	params.Watcher["watch"] = "waldorf"
 
-	params.CloneRun()
+	params.cloneRunFlag()
 
 	watch = params.Get("watch")
 	if watch != "waldorf" {
@@ -37,7 +37,7 @@ func TestParamsClone(t *testing.T) {
 func TestPrepareArgs(t *testing.T) {
 	args := []string{"watcher", "-run", "balcony", "-p", "11880", "--watch", "show", "--host", "localhost"}
 
-	params := PrepareArgs(args)
+	params := ParseArgs(args)
 	if len(params.Package) != 4 {
 		t.Fatalf("Expected 2 parameters with their values in Package parameters but got %d", len(params.Package))
 	}
@@ -85,4 +85,16 @@ func TestStripDash(t *testing.T) {
 		t.Errorf("Expected 11880 but got %s in stripDash", arg)
 	}
 
+}
+
+func TestExistIn(t *testing.T) {
+	input := []string{"a", "b", "c"}
+
+	if !existIn("c", input) {
+		t.Errorf("expected true, got false")
+	}
+
+	if existIn("d", input) {
+		t.Errorf("expected false, got true")
+	}
 }
