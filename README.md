@@ -49,6 +49,13 @@ For the cases where your main function is in another directory other than the de
 ##### Vendor directory
 Since Globs and some optional folder arrays will make it harder to configure, we are not planning to have support for a configurable watched folder structure. Only configuration we have here is, by default we have excluded vendor/ folder from watched directories. If your intention is making some changes in place, you can set -watch-vendor flag as "true", and start watching vendor directory.
 
+#### Known Issues
+On Mac OS X, when you make a tls connection, you can get a message like: x509: `certificate signed by unknown authority`
+
+You can resolve this problem by setting CGO_ENABLED=0
+https://github.com/golang/go/issues/14514
+https://codereview.appspot.com/22020045
+
 ## Author
 
 * [Can Yucel](http://canthefason.com)
