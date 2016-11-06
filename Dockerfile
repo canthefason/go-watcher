@@ -1,4 +1,4 @@
-FROM golang:1.6.2-alpine
+FROM golang:1.6.3-alpine
 MAINTAINER Can Yucel "can.yucel@gmail.com"
 
 RUN apk --update upgrade && \
@@ -6,7 +6,7 @@ RUN apk --update upgrade && \
   update-ca-certificates && \
   rm -rf /var/cache/apk/*
 
-ENV WATCHER_VERSION 0.2.1
+ENV WATCHER_VERSION 0.2.3
 
 ADD https://github.com/canthefason/go-watcher/releases/download/v${WATCHER_VERSION}/watcher-${WATCHER_VERSION}-linux-amd64 /go/bin/watcher
 
