@@ -12,4 +12,6 @@ ADD https://github.com/canthefason/go-watcher/releases/download/v${WATCHER_VERSI
 
 RUN chmod +x /go/bin/watcher
 
+VOLUME /go/src
+
 CMD ["watcher"]
