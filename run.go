@@ -7,7 +7,6 @@ package watcher
 import (
 	"log"
 	"os/exec"
-	"sync"
 
 	"github.com/fatih/color"
 )
@@ -18,8 +17,6 @@ type Runner struct {
 	start chan string
 	done  chan struct{}
 	cmd   *exec.Cmd
-
-	mu *sync.Mutex
 }
 
 // NewRunner creates a new Runner instance and returns its pointer
@@ -27,7 +24,6 @@ func NewRunner() *Runner {
 	return &Runner{
 		start: make(chan string),
 		done:  make(chan struct{}),
-		mu:    &sync.Mutex{},
 	}
 }
 
@@ -40,20 +36,18 @@ func (r *Runner) Run(p *Params) {
 		cmd, err := runCommand(fileName, p.Package...)
 		if err != nil {
 			log.Printf("Could not run the go binary: %s \n", err)
-			r.kill()
+			r.kill(cmd)
 
 			continue
 		}
 
-		r.mu.Lock()
 		r.cmd = cmd
 		removeFile(fileName)
-		r.mu.Unlock()
 
 		go func(cmd *exec.Cmd) {
 			if err := cmd.Wait(); err != nil {
 				log.Printf("process interrupted: %s \n", err)
-				r.kill()
+				r.kill(cmd)
 			}
 		}(r.cmd)
 	}
@@ -62,25 +56,20 @@ func (r *Runner) Run(p *Params) {
 // Restart kills the process, removes the old binary and
 // restarts the new process
 func (r *Runner) restart(fileName string) {
-	r.kill()
+	r.kill(r.cmd)
 
 	r.start <- fileName
 }
 
-func (r *Runner) kill() {
-	r.mu.Lock()
-	defer r.mu.Unlock()
-	if r.cmd != nil {
-		pid := r.cmd.Process.Pid
-		log.Printf("Killing PID %d \n", pid)
-		r.cmd.Process.Kill()
-		r.cmd = nil
+func (r *Runner) kill(cmd *exec.Cmd) {
+	if cmd != nil {
+		cmd.Process.Kill()
 	}
 }
 
 func (r *Runner) Close() {
 	close(r.start)
-	r.kill()
+	r.kill(r.cmd)
 	close(r.done)
 }
 
