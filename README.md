@@ -49,6 +49,20 @@ For the cases where your main function is in another directory other than the de
 ##### Vendor directory
 Since Globs and some optional folder arrays will make it harder to configure, we are not planning to have support for a configurable watched folder structure. Only configuration we have here is, by default we have excluded vendor/ folder from watched directories. If your intention is making some changes in place, you can set -watch-vendor flag as "true", and start watching vendor directory.
 
+## Watcher in Docker
+
+If you want to run Watcher in a containerized local environment, you can achieve this by using canthefason/watcher image in Docker Hub. There is an example project under /docker-example directoy. Let's first try to dockerize this example code first.
+
+In our example, we are creating a server that listens to port 7000 and responds to all clients with "watcher is running" string. The most essential thing to run your code in Docker is, mounting your project volume to a container. In the containerized Watcher, our GOPATH is set to /go directory by default, so you need to mount your project to this GOPATH.
+
+  `docker run -v /path/to/hello:/go/src/hello -p 7000:7000 canthefason/watcher watcher -run hello`
+
+Containerized Watcher also supports different versions of Go by leveraging [gvm](https://github.com/moovweb/gvm). Currently it only supports major versions right now. If you don't set anything, by default Watcher will pick version 1.7. If you want to change the Go version, you can use GO_VERSION environment variable. Currently it only supports 1.4, 1.5, 1.6, 1.7 at the moment
+
+   `docker run -v /path/to/hello:/go/src/hello -e GO_VERSION=1.6 -p 7000:7000 canthefason/watcher watcher -run hello`
+
+To provide a more structured repo, we also integrated a docker-compose manifest file. That file already handles volume mounting operation that and exposes the port to the localhost. With docker-compose the only thing that you need to do from the root, invoking `docker-compose up 
+
 #### Known Issues
 On Mac OS X, when you make a tls connection, you can get a message like: x509: `certificate signed by unknown authority`
 
