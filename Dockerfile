@@ -10,7 +10,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     bison \
 	&& rm -rf /var/lib/apt/lists/*
 
-RUN rm /bin/sh && ln -s /bin/bash /bin/sh
+SHELL ["/bin/bash", "-c"]
 
 ENV GO_VERSION 1.7
 
@@ -25,6 +25,8 @@ ADD https://github.com/canthefason/go-watcher/releases/download/v${WATCHER_VERSI
 RUN chmod +x /root/.gvm/bin/watcher
 
 ENV GOPATH /go
+
+WORKDIR /go/src
 
 VOLUME /go/src
 ADD entrypoint.sh /
