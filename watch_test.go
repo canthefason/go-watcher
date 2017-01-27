@@ -57,6 +57,6 @@ func TestIsWatchedFileType(t *testing.T) {
 	fileName = "/go/src/github.com/canthefason/go-watcher/README.md"
 
 	if isWatchedFileType(fileName) {
-		t.Errorf("expected true, got false")
+		t.Errorf("expected false, got true")
 	}
 }
