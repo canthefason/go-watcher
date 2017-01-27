@@ -1,0 +1,12 @@
+version: '2.1'
+
+services:
+  hello-world:
+    image: canthefason/watcher:latest
+    command: watcher -run hello-world
+    ports:
+      - "7000:7000"
+    environment:
+      - GO_VERSION=1.7
+    volumes:
+      - ./hello-world:/go/src/hello-world
