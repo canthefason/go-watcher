@@ -5,4 +5,6 @@ gvm use go$GO_VERSION --default
 
 export GOPATH=/go
 
+go get ./...
+
 exec "$@"
