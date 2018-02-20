@@ -1,0 +1,9 @@
+FROM golang:1.8-alpine3.6
+
+VOLUME /go/src
+
+ARG WATCHER_VERSION 0.2.4
+
+ADD https://github.com/canthefason/go-watcher/releases/download/v${WATCHER_VERSION}/watcher-${WATCHER_VERSION}-linux-amd64 $GOPATH/bin/watcher
+
+CMD ["watcher"]

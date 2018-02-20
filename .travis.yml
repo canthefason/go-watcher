@@ -1,7 +1,23 @@
 language: go
-go:
-  - 1.6
-  - 1.5
+sudo: required
+services:
+  - docker
+matrix:
+  include:
+  - go: "1.10"
+    env: GO_VERSION=1.10
+  - go: "1.9"
+    env: GO_VERSION=1.9
+  - go: "1.8"
+    env: GO_VERSION=1.8
 env:
-  - GO15VENDOREXPERIMENT=1
+  global:
+  - WATCHER_VERSION=0.2.4
+
+matrix:
+  fast_finish: true
+
+script: |
+  docker build -f Dockerfiles/Dockerfile.go$GO_VERSION -t canthefason/go-watcher:$WATCHER_VERSION-$GO_VERSION .
+  docker push canthefason/go-watcher:$WATCHER_VERSION-$GO_VERSION
 
