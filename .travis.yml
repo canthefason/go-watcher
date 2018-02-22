@@ -15,4 +15,8 @@ env:
 matrix:
   fast_finish: true
 
-script: ./build.sh
+script: go test ./...
+
+after_success:
+  ./build.sh
+
