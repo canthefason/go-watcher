@@ -1,7 +1,22 @@
 language: go
+sudo: required
+services:
+  - docker
+
 go:
-  - 1.6
-  - 1.5
+  - "1.10"
+  - "1.9"
+  - "1.8"
+
 env:
-  - GO15VENDOREXPERIMENT=1
+  global:
+  - WATCHER_VERSION=0.2.4
+
+matrix:
+  fast_finish: true
+
+script: go test ./...
+
+after_success:
+  ./build.sh
 
