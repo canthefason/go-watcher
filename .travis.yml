@@ -2,14 +2,12 @@ language: go
 sudo: required
 services:
   - docker
-matrix:
-  include:
-  - go: "1.10"
-    env: GO_VERSION=1.10
-  - go: "1.9"
-    env: GO_VERSION=1.9
-  - go: "1.8"
-    env: GO_VERSION=1.8
+
+go:
+  - GO_VERSION=1.10
+  - GO_VERSION=1.9
+  - GO_VERSION=1.8
+
 env:
   global:
   - WATCHER_VERSION=0.2.4
