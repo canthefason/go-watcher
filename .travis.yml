@@ -4,9 +4,9 @@ services:
   - docker
 
 go:
-  - GO_VERSION=1.10
-  - GO_VERSION=1.9
-  - GO_VERSION=1.8
+  - 1.10
+  - 1.9
+  - 1.8
 
 env:
   global:
@@ -16,6 +16,6 @@ matrix:
   fast_finish: true
 
 script: |
-  docker build -f Dockerfiles/Dockerfile.go$GO_VERSION -t canthefason/go-watcher:$WATCHER_VERSION-$GO_VERSION .
+  docker build -f Dockerfiles/Dockerfile.$(go version | awk '{print $3}') -t canthefason/go-watcher:$WATCHER_VERSION-$(go version | awk '{print $3}') .
   docker push canthefason/go-watcher:$WATCHER_VERSION-$GO_VERSION
 
