@@ -11,6 +11,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"runtime"
 
 	fsnotify "gopkg.in/fsnotify.v1"
 )
@@ -28,6 +29,8 @@ type Watcher struct {
 	rootdir     string
 	watcher     *fsnotify.Watcher
 	watchVendor bool
+	watchRecursive bool
+	watchRecursiveRoot string
 	// when a file gets changed a message is sent to the update channel
 	update chan struct{}
 }
@@ -36,19 +39,35 @@ type Watcher struct {
 // given folders
 func MustRegisterWatcher(params *Params) *Watcher {
 	watchVendorStr := params.Get("watch-vendor")
+	watchRecursiveStr := params.Get("watch-recursive")
+	watchRecursiveRoot := params.Get("watch-recursive-root")
 	var watchVendor bool
+	var watchRecursive bool
 	var err error
+
 	if watchVendorStr != "" {
 		watchVendor, err = strconv.ParseBool(watchVendorStr)
 		if err != nil {
 			log.Println("Wrong watch-vendor value: %s (default=false)", watchVendorStr)
 		}
 	}
+	if watchRecursiveStr != ""{
+		if watchRecursiveRoot == ""{
+			log.Fatal("watchRecursiveRoot is empty")
+		}
+
+		watchRecursive, err = strconv.ParseBool(watchRecursiveStr)
+		if err != nil {
+			log.Fatal("Wrong watch-recursive value: %s (default=false)", watchRecursiveStr)
+		}
+	}
 
 	w := &Watcher{
-		update:      make(chan struct{}),
-		rootdir:     params.Get("watch"),
-		watchVendor: watchVendor,
+		update:             make(chan struct{}),
+		rootdir:            params.Get("watch"),
+		watchVendor:        watchVendor,
+		watchRecursive:     watchRecursive,
+		watchRecursiveRoot: watchRecursiveRoot,
 	}
 
 	w.watcher, err = fsnotify.NewWatcher()
@@ -125,9 +144,24 @@ func (w *Watcher) Close() {
 // starting from the working directory
 func (w *Watcher) watchFolders() {
 	wd, err := w.prepareRootDir()
-
 	if err != nil {
 		log.Fatalf("Could not get root working directory: %s", err)
+	}
+	//supported only in mac
+	if w.watchRecursive && runtime.GOOS == "darwin" {
+		goFiles, err := w.getGoFiles(wd)
+		if err != nil {
+			log.Fatalf("Could not get recursiv go files: %s", err)
+		}
+
+		importsFolders, err := w.getImportsRoot(goFiles,wd)
+		if err != nil {
+			log.Fatalf("Could not get recursiv imports from go files: %s", err)
+		}
+
+		for _,importFolder := range importsFolders{
+			w.addFolder(importFolder)
+		}
 	}
 
 	filepath.Walk(wd, func(path string, info os.FileInfo, err error) error {
