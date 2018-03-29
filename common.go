@@ -14,7 +14,7 @@ import (
 // Binary name used for built package
 const binaryName = "watcher"
 
-// watch-recursive work only for mac
+// watch-recursive works only for mac
 var watcherFlags = []string{"run", "watch", "watch-vendor","watch-recursive","watch-recursive-root"}
 
 // Params is used for keeping go-watcher and application flag parameters

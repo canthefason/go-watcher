@@ -29,7 +29,7 @@ func(w *Watcher) getGoFiles(rootDir string) ([]string, error) {
 	return files, nil
 }
 
-func(w *Watcher) getImportsRoot(files []string,wd string) ([]string, error) {
+func(w *Watcher) getImports(files []string,wd string) ([]string, error) {
 	goPath := os.Getenv("GOPATH")
 	if goPath == "" {
 		return nil, ErrPathNotSet

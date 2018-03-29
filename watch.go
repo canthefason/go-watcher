@@ -154,7 +154,7 @@ func (w *Watcher) watchFolders() {
 			log.Fatalf("Could not get recursiv go files: %s", err)
 		}
 
-		importsFolders, err := w.getImportsRoot(goFiles,wd)
+		importsFolders, err := w.getImports(goFiles,wd)
 		if err != nil {
 			log.Fatalf("Could not get recursiv imports from go files: %s", err)
 		}
