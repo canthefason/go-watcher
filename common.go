@@ -14,7 +14,8 @@ import (
 // Binary name used for built package
 const binaryName = "watcher"
 
-var watcherFlags = []string{"run", "watch", "watch-vendor"}
+// watch-recursive works only for mac
+var watcherFlags = []string{"run", "watch", "watch-vendor","watch-recursive","watch-recursive-root"}
 
 // Params is used for keeping go-watcher and application flag parameters
 type Params struct {
@@ -160,4 +161,13 @@ func removeFile(fileName string) {
 		cmd.Run()
 		cmd.Wait()
 	}
+}
+
+func sliceContains(slice []string, s string) bool {
+	for _, t := range slice {
+		if s == t {
+			return true
+		}
+	}
+	return false
 }
