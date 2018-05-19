@@ -8,7 +8,7 @@ func TestParamsGet(t *testing.T) {
 
 	run := params.Get("run")
 	if run != "statler" {
-		t.Error("Expected statler but got %s in params.Get()", run)
+		t.Errorf("Expected statler but got %s in params.Get()", run)
 		t.FailNow()
 	}
 }
@@ -20,7 +20,7 @@ func TestParamsClone(t *testing.T) {
 	params.cloneRunFlag()
 	watch := params.Get("watch")
 	if watch != "statler" {
-		t.Error("Expected statler but got %s when watch param is not set", watch)
+		t.Errorf("Expected statler but got %s when watch param is not set", watch)
 	}
 
 	params.Watcher["watch"] = "waldorf"

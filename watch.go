@@ -41,7 +41,7 @@ func MustRegisterWatcher(params *Params) *Watcher {
 	if watchVendorStr != "" {
 		watchVendor, err = strconv.ParseBool(watchVendorStr)
 		if err != nil {
-			log.Println("Wrong watch-vendor value: %s (default=false)", watchVendorStr)
+			log.Printf("Wrong watch-vendor value: %s (default=false)\n", watchVendorStr)
 		}
 	}
 

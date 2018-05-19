@@ -2,6 +2,7 @@ package watcher
 
 import (
 	"fmt"
+	"go/build"
 	"io"
 	"log"
 	"math/rand"
@@ -63,11 +64,10 @@ func (p *Params) generateBinaryName() string {
 
 func generateBinaryPrefix() string {
 	path := os.Getenv("GOPATH")
-	if path != "" {
-		return fmt.Sprintf("%s/bin/%s", path, binaryName)
+	if path == "" {
+		path = build.Default.GOPATH
 	}
-
-	return path
+	return fmt.Sprintf("%s/bin/%s", path, binaryName)
 }
 
 // runCommand runs the command with given name and arguments. It copies the
