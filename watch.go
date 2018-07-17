@@ -126,6 +126,7 @@ func (w *Watcher) Close() {
 func (w *Watcher) watchFolders() {
 	wd, err := w.prepareRootDir()
 	if err != nil {
+		fmt.Printf("Could not get root working directory: %s\n", err)
 		log.Fatalf("Could not get root working directory: %s", err)
 	}
 	var dirs []string
