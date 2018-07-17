@@ -37,24 +37,24 @@ func TestPrepareRootDir(t *testing.T) {
 }
 
 func TestIsTestFile(t *testing.T) {
-	fileName := "/go/src/github.com/canthefason/go-watcher/common.go"
+	fileName := "/go/src/github.com/torniker/go-watcher/common.go"
 	if isTestFile(fileName) {
 		t.Error("expected false, got true")
 	}
 
-	fileName = "/go/src/github.com/canthefason/go-watcher/common_test.go"
+	fileName = "/go/src/github.com/torniker/go-watcher/common_test.go"
 	if !isTestFile(fileName) {
 		t.Error("expected true, got false")
 	}
 }
 
 func TestIsWatchedFileType(t *testing.T) {
-	fileName := "/go/src/github.com/canthefason/go-watcher/common.go"
+	fileName := "/go/src/github.com/torniker/go-watcher/common.go"
 	if !isWatchedFileType(fileName) {
 		t.Errorf("expected true, got false")
 	}
 
-	fileName = "/go/src/github.com/canthefason/go-watcher/README.md"
+	fileName = "/go/src/github.com/torniker/go-watcher/README.md"
 
 	if isWatchedFileType(fileName) {
 		t.Errorf("expected false, got true")

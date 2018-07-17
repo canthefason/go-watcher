@@ -152,9 +152,16 @@ func (w *Watcher) watchFolders() {
 		if len(path) > 1 && strings.HasPrefix(filepath.Base(path), ".") {
 			return filepath.SkipDir
 		}
-
-		w.addFolder(path)
-
+		w.addFolder(path + "/../../cache")
+		w.addFolder(path + "/../../constant")
+		w.addFolder(path + "/../../env")
+		w.addFolder(path + "/../../event")
+		w.addFolder(path + "/../../mapper")
+		w.addFolder(path + "/../../model")
+		w.addFolder(path + "/../../repo")
+		w.addFolder(path + "/../../schema")
+		w.addFolder(path + "/../../search")
+		w.addFolder(path + "/../../util")
 		return err
 	})
 }
