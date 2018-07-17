@@ -140,7 +140,9 @@ func (w *Watcher) watchFolders() {
 	dirs = append(dirs, wd+"/../../schema")
 	dirs = append(dirs, wd+"/../../search")
 	dirs = append(dirs, wd+"/../../util")
+	fmt.Println("Watching:")
 	for _, dir := range dirs {
+		fmt.Println(dir)
 		filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
 			// skip files
 			if info == nil {
