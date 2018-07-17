@@ -166,6 +166,7 @@ func (w *Watcher) watchFolders() {
 			if len(path) > 1 && strings.HasPrefix(filepath.Base(path), ".") {
 				return filepath.SkipDir
 			}
+			w.addFolder(path)
 			return err
 		})
 	}
