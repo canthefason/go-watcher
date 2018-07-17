@@ -125,45 +125,47 @@ func (w *Watcher) Close() {
 // starting from the working directory
 func (w *Watcher) watchFolders() {
 	wd, err := w.prepareRootDir()
-
 	if err != nil {
 		log.Fatalf("Could not get root working directory: %s", err)
 	}
+	var dirs []string
+	dirs = append(dirs, wd)
+	dirs = append(dirs, wd+"/../../cache")
+	dirs = append(dirs, wd+"/../../constant")
+	dirs = append(dirs, wd+"/../../env")
+	dirs = append(dirs, wd+"/../../event")
+	dirs = append(dirs, wd+"/../../mapper")
+	dirs = append(dirs, wd+"/../../model")
+	dirs = append(dirs, wd+"/../../repo")
+	dirs = append(dirs, wd+"/../../schema")
+	dirs = append(dirs, wd+"/../../search")
+	dirs = append(dirs, wd+"/../../util")
+	for _, dir := range dirs {
+		filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
+			// skip files
+			if info == nil {
+				log.Fatalf("wrong watcher package: %s", path)
+			}
 
-	filepath.Walk(wd, func(path string, info os.FileInfo, err error) error {
-		// skip files
-		if info == nil {
-			log.Fatalf("wrong watcher package: %s", path)
-		}
+			if !info.IsDir() {
+				return nil
+			}
 
-		if !info.IsDir() {
-			return nil
-		}
+			if !w.watchVendor {
+				// skip vendor directory
+				vendor := fmt.Sprintf("%s/vendor", wd)
+				if strings.HasPrefix(path, vendor) {
+					return filepath.SkipDir
+				}
+			}
 
-		if !w.watchVendor {
-			// skip vendor directory
-			vendor := fmt.Sprintf("%s/vendor", wd)
-			if strings.HasPrefix(path, vendor) {
+			// skip hidden folders
+			if len(path) > 1 && strings.HasPrefix(filepath.Base(path), ".") {
 				return filepath.SkipDir
 			}
-		}
-
-		// skip hidden folders
-		if len(path) > 1 && strings.HasPrefix(filepath.Base(path), ".") {
-			return filepath.SkipDir
-		}
-		w.addFolder(path + "/../../cache")
-		w.addFolder(path + "/../../constant")
-		w.addFolder(path + "/../../env")
-		w.addFolder(path + "/../../event")
-		w.addFolder(path + "/../../mapper")
-		w.addFolder(path + "/../../model")
-		w.addFolder(path + "/../../repo")
-		w.addFolder(path + "/../../schema")
-		w.addFolder(path + "/../../search")
-		w.addFolder(path + "/../../util")
-		return err
-	})
+			return err
+		})
+	}
 }
 
 // addFolder adds given folder name to the watched folders, and starts
