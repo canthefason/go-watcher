@@ -131,15 +131,12 @@ func (w *Watcher) watchFolders() {
 	}
 	var dirs []string
 	dirs = append(dirs, wd)
-	dirs = append(dirs, wd+"/../../cache")
+	dirs = append(dirs, wd+"/../../build")
 	dirs = append(dirs, wd+"/../../constant")
 	dirs = append(dirs, wd+"/../../env")
-	dirs = append(dirs, wd+"/../../event")
-	dirs = append(dirs, wd+"/../../mapper")
 	dirs = append(dirs, wd+"/../../model")
 	dirs = append(dirs, wd+"/../../repo")
 	dirs = append(dirs, wd+"/../../schema")
-	dirs = append(dirs, wd+"/../../search")
 	dirs = append(dirs, wd+"/../../util")
 	fmt.Println("Watching:")
 	for _, dir := range dirs {
