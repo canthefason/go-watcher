@@ -121,7 +121,10 @@ func parseWatchList(wd string) []string {
 			return watchList
 		}
 		watchStr := string(b)
-		watchList = strings.Split(watchStr, "\n")
+		watchListRelative := strings.Split(watchStr, "\n")
+		for _, wlr := range watchListRelative {
+			watchList = append(watchList, wd+"/"+wlr)
+		}
 	}
 	return watchList
 }
