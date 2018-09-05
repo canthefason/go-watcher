@@ -5,6 +5,7 @@ package watcher
 import (
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
@@ -110,6 +111,21 @@ func isWatchedFileType(fileName string) bool {
 	return existIn(ext, watchedFileExt)
 }
 
+func parseWatchList(wd string) []string {
+	var watchList []string
+	watchFile := wd + "/.watch"
+	if _, err := os.Stat(watchFile); err == nil {
+		b, err := ioutil.ReadFile(watchFile) // just pass the file name
+		if err != nil {
+			fmt.Print(err)
+			return watchList
+		}
+		watchStr := string(b)
+		watchList = strings.Split(watchStr, "\n")
+	}
+	return watchList
+}
+
 // Wait waits for the latest messages
 func (w *Watcher) Wait() <-chan struct{} {
 	return w.update
@@ -131,13 +147,14 @@ func (w *Watcher) watchFolders() {
 	}
 	var dirs []string
 	dirs = append(dirs, wd)
-	dirs = append(dirs, wd+"/../../build")
-	dirs = append(dirs, wd+"/../../constant")
-	dirs = append(dirs, wd+"/../../env")
-	dirs = append(dirs, wd+"/../../model")
-	dirs = append(dirs, wd+"/../../repo")
-	dirs = append(dirs, wd+"/../../schema")
-	dirs = append(dirs, wd+"/../../util")
+	dirs = append(dirs, parseWatchList(wd)...)
+	// dirs = append(dirs, wd+"/../../build")
+	// dirs = append(dirs, wd+"/../../constant")
+	// dirs = append(dirs, wd+"/../../env")
+	// dirs = append(dirs, wd+"/../../model")
+	// dirs = append(dirs, wd+"/../../repo")
+	// dirs = append(dirs, wd+"/../../schema")
+	// dirs = append(dirs, wd+"/../../util")
 	fmt.Println("Watching:")
 	for _, dir := range dirs {
 		fmt.Println(dir)
