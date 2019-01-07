@@ -35,7 +35,6 @@ func (b *Builder) Build(p *Params) {
 
 		pkg := p.packagePath()
 
-		log.Println("build started")
 		color.Cyan("Building %s...\n", pkg)
 
 		// build package
@@ -54,7 +53,7 @@ func (b *Builder) Build(p *Params) {
 
 			continue
 		}
-		log.Println("build completed")
+		color.Green("Completed %s...\n", pkg)
 
 		// and start the new process
 		b.runner.restart(fileName)
