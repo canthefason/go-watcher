@@ -5,8 +5,10 @@
 package watcher
 
 import (
-	"log"
+	"fmt"
 	"os/exec"
+	"syscall"
+	"time"
 
 	"github.com/fatih/color"
 )
@@ -35,7 +37,7 @@ func (r *Runner) Run(p *Params) {
 
 		cmd, err := runCommand(fileName, p.Package...)
 		if err != nil {
-			log.Printf("Could not run the go binary: %s \n", err)
+			color.Red(fmt.Sprintf("Could not run the go binary: %s \n", err))
 			r.kill(cmd)
 
 			continue
@@ -46,7 +48,7 @@ func (r *Runner) Run(p *Params) {
 
 		go func(cmd *exec.Cmd) {
 			if err := cmd.Wait(); err != nil {
-				log.Printf("process interrupted: %s \n", err)
+				color.Red(fmt.Sprintf("process interrupted: %s \n", err))
 				r.kill(cmd)
 			}
 		}(r.cmd)
@@ -61,9 +63,24 @@ func (r *Runner) restart(fileName string) {
 	r.start <- fileName
 }
 
+// Signal the process to shutdown, if it doesn't, kill it!
 func (r *Runner) kill(cmd *exec.Cmd) {
 	if cmd != nil {
-		cmd.Process.Kill()
+		cmd.Process.Signal(syscall.SIGINT)
+
+		didExit := make(chan struct{})
+		go func() {
+			select {
+			case <-didExit:
+			case <-time.After(5 * time.Second):
+				cmd.Process.Kill()
+			}
+		}()
+
+		state, err := cmd.Process.Wait()
+		if err == nil && state.Exited() {
+			close(didExit)
+		}
 	}
 }
 
