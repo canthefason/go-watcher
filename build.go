@@ -38,8 +38,31 @@ func (b *Builder) Build(p *Params) {
 		log.Println("build started")
 		color.Cyan("Building %s...\n", pkg)
 
+		params := []string{
+			"build", "-i",
+		}
+		if os.Getenv("GO111MODULE") == "on" {
+			log.Println("Go modules enabled. Running 'go mod vendor'...")
+			cmd, err := runCommand("go", "mod", "vendor")
+			if err != nil {
+				log.Fatalf("Could not run 'go mod vendor' command: %s", err)
+				continue
+			}
+			if err := cmd.Wait(); err != nil {
+				if err := interpretError(err); err != nil {
+					color.Red("An error occurred while building: %s", err)
+				} else {
+					color.Red("A build error occurred. Please update your code...")
+				}
+				continue
+			}
+			params = append(params, "-mod=vendor")
+		}
+		params = append(params, []string{"-o", fileName, pkg}...)
+
 		// build package
-		cmd, err := runCommand("go", "build", "-i", "-o", fileName, pkg)
+		// cmd, err := runCommand("go", "build", "-i", "-o", fileName, pkg)
+		cmd, err := runCommand("go", params...)
 		if err != nil {
 			log.Fatalf("Could not run 'go build' command: %s", err)
 			continue
