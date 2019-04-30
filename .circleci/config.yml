@@ -1,0 +1,63 @@
+version: 2
+defaults: &defaults
+  docker:
+    - image: quay.io/glidr/builder:golang1.9.1
+      auth:
+        username: $QUAY_USERNAME
+        password: $QUAY_PASSWORD
+  working_directory: /go/src/github.com/launchpadcentral/go-watcher
+
+jobs:
+  test:
+    <<: *defaults
+    environment:
+      TEST_RESULTS: /tmp/test-results
+    steps:
+    - checkout
+    - run:
+        name: Provision environment
+        command: |
+          go get github.com/jstemmer/go-junit-report
+          mkdir -p /tmp/test-results
+          git clone git@github.com:launchpadcentral/cicd.git
+    - run:
+        name: Run unit tests
+        command: |
+          ./cicd/scripts/test_microservice.sh
+          bash <(curl -s https://codecov.io/bash) -t a864e823-8ae9-459f-adcc-e380bec409d4
+    - store_test_results:
+        path: /tmp/test-results
+  build:
+    <<: *defaults
+    environment:
+      REPONAME: go-watcher
+    steps:
+    - checkout
+    - setup_remote_docker:
+        version: 17.06.0-ce
+    - run:
+        name: Provision environment
+        command: |
+          git clone git@github.com:launchpadcentral/cicd.git
+    - run:
+        name: Build Docker image
+        command: |
+          ./cicd/scripts/build_docker_image.sh
+
+workflows:
+  version: 2
+  test:
+    jobs:
+      - test:
+          context: org-global
+          filters:
+            tags:
+              only: /.*/
+      - build:
+          context: org-global
+          requires:
+            - test
+          filters:
+             branches:
+               only:
+                 - master
