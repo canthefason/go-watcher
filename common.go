@@ -14,7 +14,7 @@ import (
 // Binary name used for built package
 const binaryName = "watcher"
 
-var watcherFlags = []string{"run", "watch", "watch-vendor"}
+var watcherFlags = []string{"run", "watch", "watch-vendor", "watch-ignore"}
 
 // Params is used for keeping go-watcher and application flag parameters
 type Params struct {
