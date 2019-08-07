@@ -28,6 +28,7 @@ type Watcher struct {
 	rootdir     string
 	watcher     *fsnotify.Watcher
 	watchVendor bool
+	ignorePaths string
 	// when a file gets changed a message is sent to the update channel
 	update chan struct{}
 }
@@ -49,6 +50,7 @@ func MustRegisterWatcher(params *Params) *Watcher {
 		update:      make(chan struct{}),
 		rootdir:     params.Get("watch"),
 		watchVendor: watchVendor,
+		ignorePaths: params.Get("watch-ignore"),
 	}
 
 	w.watcher, err = fsnotify.NewWatcher()
@@ -130,6 +132,9 @@ func (w *Watcher) watchFolders() {
 		log.Fatalf("Could not get root working directory: %s", err)
 	}
 
+	// Unpack ignores
+	ignorePaths := strings.Split(w.ignorePaths, ";")
+
 	filepath.Walk(wd, func(path string, info os.FileInfo, err error) error {
 		// skip files
 		if info == nil {
@@ -144,6 +149,14 @@ func (w *Watcher) watchFolders() {
 			// skip vendor directory
 			vendor := fmt.Sprintf("%s/vendor", wd)
 			if strings.HasPrefix(path, vendor) {
+				return filepath.SkipDir
+			}
+		}
+
+		// skip ignored files
+		relative := strings.TrimPrefix(path, wd)
+		for _, ignorePath := range ignorePaths {
+			if strings.TrimPrefix(relative, "/") == ignorePath {
 				return filepath.SkipDir
 			}
 		}
