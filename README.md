@@ -51,7 +51,7 @@ Since Globs and some optional folder arrays will make it harder to configure, we
 
 ## Watcher in Docker
 
-If you want to run Watcher in a containerized local environment, you can achieve this by using [canthefason/go-watcher](https://hub.docker.com/r/canthefason/go-watcher/) image in Docker Hub. There is an example project under [/docker-example](https://github.com/canthefason/go-watcher/tree/dockerfile-gvm/docker-examples) directoy. Let's try to dockerize this example code first.
+If you want to run Watcher in a containerized local environment, you can achieve this by using [canthefason/go-watcher](https://hub.docker.com/r/canthefason/go-watcher/) image in Docker Hub. There is an example project under [/docker-examples](./docker-examples) directoy. Let's try to dockerize this example code first.
 
 In our example, we are creating a server that listens to port 7000 and responds to all clients with "watcher is running" string. The most essential thing to run your code in Docker is, mounting your project volume to a container. In the containerized Watcher, our GOPATH is set to /go directory by default, so you need to mount your project to this GOPATH.
 
