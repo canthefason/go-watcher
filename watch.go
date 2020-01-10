@@ -5,6 +5,7 @@ package watcher
 import (
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
@@ -41,7 +42,7 @@ func MustRegisterWatcher(params *Params) *Watcher {
 	if watchVendorStr != "" {
 		watchVendor, err = strconv.ParseBool(watchVendorStr)
 		if err != nil {
-			log.Println("Wrong watch-vendor value: %s (default=false)", watchVendorStr)
+			log.Printf("Wrong watch-vendor value: %s (default=false)\n", watchVendorStr)
 		}
 	}
 
@@ -110,6 +111,24 @@ func isWatchedFileType(fileName string) bool {
 	return existIn(ext, watchedFileExt)
 }
 
+func parseWatchList(wd string) []string {
+	var watchList []string
+	watchFile := wd + "/.watch"
+	if _, err := os.Stat(watchFile); err == nil {
+		b, err := ioutil.ReadFile(watchFile) // just pass the file name
+		if err != nil {
+			fmt.Print(err)
+			return watchList
+		}
+		watchStr := string(b)
+		watchListRelative := strings.Split(watchStr, "\n")
+		for _, wlr := range watchListRelative {
+			watchList = append(watchList, wd+"/"+wlr)
+		}
+	}
+	return watchList
+}
+
 // Wait waits for the latest messages
 func (w *Watcher) Wait() <-chan struct{} {
 	return w.update
@@ -125,38 +144,49 @@ func (w *Watcher) Close() {
 // starting from the working directory
 func (w *Watcher) watchFolders() {
 	wd, err := w.prepareRootDir()
-
 	if err != nil {
+		fmt.Printf("Could not get root working directory: %s\n", err)
 		log.Fatalf("Could not get root working directory: %s", err)
 	}
+	var dirs []string
+	dirs = append(dirs, wd)
+	dirs = append(dirs, parseWatchList(wd)...)
+	// dirs = append(dirs, wd+"/../../build")
+	// dirs = append(dirs, wd+"/../../constant")
+	// dirs = append(dirs, wd+"/../../env")
+	// dirs = append(dirs, wd+"/../../model")
+	// dirs = append(dirs, wd+"/../../repo")
+	// dirs = append(dirs, wd+"/../../schema")
+	// dirs = append(dirs, wd+"/../../util")
+	fmt.Println("Watching:")
+	for _, dir := range dirs {
+		fmt.Println(dir)
+		filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
+			// skip files
+			if info == nil {
+				log.Fatalf("wrong watcher package: %s", path)
+			}
 
-	filepath.Walk(wd, func(path string, info os.FileInfo, err error) error {
-		// skip files
-		if info == nil {
-			log.Fatalf("wrong watcher package: %s", path)
-		}
+			if !info.IsDir() {
+				return nil
+			}
 
-		if !info.IsDir() {
-			return nil
-		}
+			if !w.watchVendor {
+				// skip vendor directory
+				vendor := fmt.Sprintf("%s/vendor", wd)
+				if strings.HasPrefix(path, vendor) {
+					return filepath.SkipDir
+				}
+			}
 
-		if !w.watchVendor {
-			// skip vendor directory
-			vendor := fmt.Sprintf("%s/vendor", wd)
-			if strings.HasPrefix(path, vendor) {
+			// skip hidden folders
+			if len(path) > 1 && strings.HasPrefix(filepath.Base(path), ".") {
 				return filepath.SkipDir
 			}
-		}
-
-		// skip hidden folders
-		if len(path) > 1 && strings.HasPrefix(filepath.Base(path), ".") {
-			return filepath.SkipDir
-		}
-
-		w.addFolder(path)
-
-		return err
-	})
+			w.addFolder(path)
+			return err
+		})
+	}
 }
 
 // addFolder adds given folder name to the watched folders, and starts
