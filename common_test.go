@@ -8,7 +8,7 @@ func TestParamsGet(t *testing.T) {
 
 	run := params.Get("run")
 	if run != "statler" {
-		t.Error("Expected statler but got %s in params.Get()", run)
+		t.Errorf("Expected statler but got %s in params.Get()", run)
 		t.FailNow()
 	}
 }
